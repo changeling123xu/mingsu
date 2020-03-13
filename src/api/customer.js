@@ -1,16 +1,16 @@
 import request from '@/utils/request'
 
-export function getList(params) {
+export function getCustomerList(params) {
   return request({
-    url: '/vue-admin-template/table/list',
+    url: '/api/customer/list',
     method: 'get',
     params
   })
 }
 
-export function getRenterList(params) {
+export function getRenterMessage(params){
   return request({
-    url: '/api/table/list',
+    url:'/api/user/rent_message',
     method: 'get',
     params
   })
