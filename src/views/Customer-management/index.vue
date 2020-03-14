@@ -1,13 +1,18 @@
 <template>
   <div class="customer">
     <page-title title="租客信息表">
-      <el-button type="text" style="float: right">
+      <el-button type="text" style="float: right" @click="addRenter('add')">
         <span>新增</span>
         <i class="el-icon-circle-plus-outline el-icon--right" />
       </el-button>
     </page-title>
     <el-card shadow="hover">
-      <el-table :data="renterData.data" style="width: 100%" fit highlight-current-row>
+      <el-table
+        :data="renterData.data.slice((currentPage-1)*pagesize,currentPage*pagesize)"
+        style="width: 100%"
+        fit
+        highlight-current-row
+      >
         <el-table-column prop="date" label="入住时间" width="180" align="center" />
         <el-table-column prop="name" label="姓名" width="180" align="center" />
         <el-table-column prop="address" label="地址" />
@@ -25,12 +30,6 @@
                     row: scope.row
                   }"
                 >修改</el-dropdown-item>
-                <el-dropdown-item
-                  :command="{
-                    type: 'details',
-                    row: scope.row
-                  }"
-                >详情</el-dropdown-item>
                 <el-dropdown-item
                   :command="{
                     type: 'delete',
@@ -76,26 +75,35 @@
           </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
-          <el-button @click="flag = false">取 消</el-button>
-          <el-button type="primary" @click="flag = false">确 定</el-button>
+          <el-button @click="dialogClose()">取 消</el-button>
+          <el-button type="primary" @click="dialogSub(tenantInformation.userId)">确 定</el-button>
         </div>
       </el-dialog>
-      <el-pagination background layout="prev, pager, next" :total="10" />
+      <el-pagination
+        background
+        layout="prev, pager, next"
+        :page-size="10"
+        :total="renterData.total"
+        @current-change="handleCurrentChange"
+        :current-page.sync="currentPage"
+      />
     </el-card>
   </div>
 </template>
 <script>
 import PageTitle from "@/components/PageTitle";
-import { getRenterList } from "@/api/table";
+import { getRenterList, updatedRenterMessage, deleteRenter } from "@/api/table";
 export default {
   components: {
     PageTitle
   },
   data() {
     return {
-      renterData:{
-        total:1,
-        data:[]
+      currentPage: "1",
+      pagesize:'10',
+      renterData: {
+        total: 5,
+        data: []
       },
       gridData: [
         {
@@ -121,8 +129,10 @@ export default {
       ],
       flag: false,
       tenantInformation: {
-        name: "1",
-        telephone: "1",
+        userId: "",
+        houseId: "",
+        name: "",
+        telephone: "",
         date: "",
         region: "",
         address: ""
@@ -133,45 +143,112 @@ export default {
   mounted() {
     this.renterList();
   },
+  computed: {
+    renterMessage() {
+      return {
+        user_id: this.tenantInformation.userId,
+        rent_name: this.tenantInformation.name,
+        rent_email: "",
+        rent_phone: this.tenantInformation.telephone,
+        house_id: this.tenantInformation.houseId,
+        rent_image: null,
+        rent_time: this.tenantInformation.date,
+        rent_address: this.tenantInformation.address
+      };
+    }
+  },
   methods: {
-    // handleEdit(index, row) {
-    //   console.log(index, row)
-    // },
-    // handleDelete(index, row) {
-    //   console.log(index, row)
-    // }
     renterList() {
       getRenterList({}).then(({ data }) => {
-
-        let dataList=data.map(item => {
+        let dataList = data.map(item => {
           // let time=itme.rent_time.
           return {
-            userId:item.user_id,
+            userId: item.user_id,
             date: item.rent_time,
             name: item.rent_name,
             phone: item.rent_phone,
             address: item.rent_address
           };
         });
-        this.renterData={
-          total:data.length,
-          data:dataList
-        }
-        // user_id: "a001"
-        // rent_name: "张三"
-        // rent_email: "2431729@qq.com"
-        // rent_phone: "12700487466"
-        // house_id: "h001"
-        // rent_image: null
-        // rent_time: "2020-02-02T16:00:00.000Z"
-        // rent_address: null
+        this.renterData = {
+          total: data.length,
+          data: dataList
+        };
+      });
+    },
+    addRenter() {
+      this.dialogClose();
+      this.flag = true;
+    },
+    onEdite(row) {
+      this.tenantInformation = {
+        userId: row.userId,
+        name: row.name,
+        telephone: row.phone,
+        date: row.date,
+        region: "",
+        address: row.address
+      };
+      this.flag = true;
+    },
+    dialogClose() {
+      this.tenantInformation = {
+        name: "",
+        telephone: "",
+        date: "",
+        region: "",
+        address: ""
+      };
+      this.flag = false;
+    },
+    dialogSub(userId) {
+      let res = this.renterData.data.find(item => item.userId === userId);
+      if (res) {
+        updatedRenterMessage(this.renterMessage).then(data => {
+          this.flag = false;
+          this.renterList();
+          this.$message({
+            type: "success",
+            message: "修改成功"
+          });
+        });
+      } else {
+        let id = this.renterData.total + 1;
+        id = id > 9 ? id : "0" + id;
+        this.tenantInformation.userId = "a0" + id;
+        this.tenantInformation.houseId = "h0" + id;
+        updatedRenterMessage(this.renterMessage).then(data => {
+          this.flag = false;
+          this.renterList();
+          this.$message({
+            type: "success",
+            message: "新增成功"
+          });
+        });
+      }
+    },
+    onDelete(userId) {
+      deleteRenter({ user_id: userId }).then(data => {
+        this.renterList();
+        this.$message({
+          type: "success",
+          message: "删除成功"
+        });
       });
     },
     handleCommand({ type, row }) {
-      // if (type === 'edite') {
-      // }
-      this.flag = type == "details" ? true : false;
+      if (type === "edite") {
+        this.onEdite(row);
+      }
+      if (type === "delete") {
+        this.onDelete(row.userId);
+      }
       console.log(type, row);
+    },
+
+    handleCurrentChange(val) {
+      this.currentPage=val
+      console.log(`当前页: ${val}`);
     }
   }
 };

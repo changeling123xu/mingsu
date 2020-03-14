@@ -13,7 +13,7 @@
       </p>
       <div class="user-images" v-if="item.renterImage.length>0">
         <el-carousel :interval="6000" type="card" height="220px">
-          <el-carousel-item v-for="img in item.renterImage" :key="img">
+          <el-carousel-item v-for="img in item.renterImage" :key="img.ms_url">
             <img :src="img.ms_url" class="image" />
           </el-carousel-item>
         </el-carousel>
@@ -128,6 +128,7 @@ export default {
      getRenter(){
       getRenterMessage().then(({data})=>{
       this.renterMessage=data.data
+      console.log(this.renterMessage);
 
       });
 

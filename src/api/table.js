@@ -15,3 +15,19 @@ export function getRenterList(params) {
     params
   })
 }
+
+export function updatedRenterMessage(data) {
+  return request({
+    url: '/api/table/renter',
+    method: 'post',
+    data
+  })
+}
+
+export function deleteRenter(params) {
+  return request({
+    url: '/api/table/delete',
+    method: 'get',
+    params
+  })
+}
