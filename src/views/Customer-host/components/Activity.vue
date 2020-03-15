@@ -128,10 +128,7 @@ export default {
      getRenter(){
       getRenterMessage().then(({data})=>{
       this.renterMessage=data.data
-      console.log(this.renterMessage);
-
       });
-
     }
   }
 };

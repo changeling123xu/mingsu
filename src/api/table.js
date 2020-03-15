@@ -31,3 +31,28 @@ export function deleteRenter(params) {
     params
   })
 }
+// ---------------------------房源相关-------------------------------
+
+export function getHouseList(params){
+  return request({
+    url: '/api/table/getHouse',
+    method: 'get',
+    params
+  })
+}
+
+export function getHouseAllServer(params){
+  return request({
+    url: '/api/table/getHouseAllServer',
+    method: 'get',
+    params
+  })
+}
+
+export function setUpdateHouse(data){
+  return request({
+    url: '/api/table/updateHouse',
+    method: 'post',
+    data
+  })
+}

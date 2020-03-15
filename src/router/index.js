@@ -27,8 +27,7 @@ import Layout from '@/layout'
  * a base page that does not have permission requirements
  * all roles can be accessed
  */
-export const constantRoutes = [
-  {
+export const constantRoutes = [{
     path: '/login',
     component: () => import('@/views/login/index'),
     hidden: true
@@ -48,7 +47,10 @@ export const constantRoutes = [
       path: 'dashboard',
       name: 'Dashboard',
       component: () => import('@/views/dashboard/index'),
-      meta: { title: 'Dashboard', icon: 'dashboard' }
+      meta: {
+        title: 'Dashboard',
+        icon: 'dashboard'
+      }
     }]
   },
 
@@ -57,19 +59,27 @@ export const constantRoutes = [
     component: Layout,
     redirect: '/example/table',
     name: 'Example',
-    meta: { title: 'Example', icon: 'example' },
-    children: [
-      {
+    meta: {
+      title: 'Example',
+      icon: 'example'
+    },
+    children: [{
         path: 'table',
         name: 'Table',
         component: () => import('@/views/table/index'),
-        meta: { title: 'Table', icon: 'table' }
+        meta: {
+          title: 'Table',
+          icon: 'table'
+        }
       },
       {
         path: 'tree',
         name: 'Tree',
         component: () => import('@/views/tree/index'),
-        meta: { title: 'Tree', icon: 'tree' }
+        meta: {
+          title: 'Tree',
+          icon: 'tree'
+        }
       }
     ]
   },
@@ -77,14 +87,15 @@ export const constantRoutes = [
   {
     path: '/form',
     component: Layout,
-    children: [
-      {
-        path: 'index',
-        name: 'Form',
-        component: () => import('@/views/form/index'),
-        meta: { title: 'Form', icon: 'form' }
+    children: [{
+      path: 'index',
+      name: 'Form',
+      component: () => import('@/views/form/index'),
+      meta: {
+        title: 'Form',
+        icon: 'form'
       }
-    ]
+    }]
   },
 
   {
@@ -97,30 +108,54 @@ export const constantRoutes = [
       icon: 'availability'
     },
     children: [{
-      path: 'availability',
-      name: 'Availability',
-      component: () => import('@/views/Availability/index'),
-      meta: { title: '房源管理', icon: 'availability' }
-    }]
+        path: 'availability',
+        name: 'Availability',
+        component: () => import('@/views/Availability/index'),
+        meta: {
+          title: '房源管理',
+          icon: 'availability'
+        }
+      },
+      {
+        path: 'availabilitydetile',
+        // redirect: 'availabilitydetile',
+        name: 'AvailiblityDetile',
+        component: () => import('@/views/AviliblityDetail/index'),
+        meta: {
+          title: '房源管理',
+          icon: 'availability'
+        },
+        hidden: true
+
+      }
+    ]
   },
   {
     path: '/customer',
     component: Layout,
     redirect: '/customer/list',
     name: 'Customer',
-    meta: { title: '客户管理', icon: 'example' },
-    children: [
-      {
+    meta: {
+      title: '客户管理',
+      icon: 'example'
+    },
+    children: [{
         path: 'customer-management',
         name: 'Customer-management',
         component: () => import('@/views/Customer-management/index'),
-        meta: { title: '租客信息', icon: 'customer-management' }
+        meta: {
+          title: '租客信息',
+          icon: 'customer-management'
+        }
       },
       {
         path: 'customer-host',
         name: 'Customer-host',
         component: () => import('@/views/Customer-host/index'),
-        meta: { title: '房东信息', icon: 'customer-host' }
+        meta: {
+          title: '房东信息',
+          icon: 'customer-host'
+        }
       }
     ]
   },
@@ -129,22 +164,30 @@ export const constantRoutes = [
     component: Layout,
     redirect: '/profile/index',
     hidden: true,
-    children: [
-      {
-        path: 'index',
-        component: () => import('@/views/Profile/index'),
-        name: 'Profile',
-        meta: { title: 'Profile', icon: 'user', noCache: true }
+    children: [{
+      path: 'index',
+      component: () => import('@/views/Profile/index'),
+      name: 'Profile',
+      meta: {
+        title: 'Profile',
+        icon: 'user',
+        noCache: true
       }
-    ]
+    }]
   },
   // 404 page must be placed at the end !!!
-  { path: '*', redirect: '/404', hidden: true }
+  {
+    path: '*',
+    redirect: '/404',
+    hidden: true
+  }
 ]
 
 const createRouter = () => new Router({
   // mode: 'history', // require service support
-  scrollBehavior: () => ({ y: 0 }),
+  scrollBehavior: () => ({
+    y: 0
+  }),
   routes: constantRoutes
 })
 
