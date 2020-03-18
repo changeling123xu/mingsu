@@ -99,7 +99,7 @@ export default {
   },
   data() {
     return {
-      currentPage: "1",
+      currentPage: 1,
       pagesize:'10',
       renterData: {
         total: 5,

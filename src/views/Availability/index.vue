@@ -1,7 +1,7 @@
 <template>
-  <div class="availability">
+  <div class="availability" v-loading="loading">
     <page-title title="房源信息表">
-      <el-button type="text" style="float: right">
+      <el-button type="text" style="float: right" @click="addHouse">
         <span>新增</span>
         <i class="el-icon-circle-plus-outline el-icon--right" />
       </el-button>
@@ -13,7 +13,7 @@
         <el-table-column prop="house_id" label="ID" show-overflow-tooltip></el-table-column>
 
         <el-table-column prop="house_name" label="小区名称" width="120"></el-table-column>
-        <el-table-column prop="house_status" label="地址" show-overflow-tooltip></el-table-column>
+        <el-table-column prop="house_status" label="状态" show-overflow-tooltip></el-table-column>
         <el-table-column prop="house_type" label="户型" show-overflow-tooltip></el-table-column>
         <el-table-column prop="house_area" label="面积" show-overflow-tooltip></el-table-column>
         <el-table-column prop="house_price" label="价格" show-overflow-tooltip></el-table-column>
@@ -44,17 +44,30 @@
           </template>
         </el-table-column>
       </el-table>
+      <el-pagination
+        background
+        layout="prev, pager, next"
+        :page-size="10"
+        :total="tableData.length"
+        @current-change="handleCurrentChange"
+        :current-page.sync="currentPage"
+      />
     </el-card>
   </div>
 </template>
 <script>
 import PageTitle from "@/components/PageTitle";
-import { getHouseList } from "@/api/table";
+import { getHouseList, deleteHouse } from "@/api/table";
+import { Loading } from "element-ui";
 export default {
   data() {
     return {
       tableData: [],
-      multipleSelection: []
+      multipleSelection: [],
+      creatId: "",
+      loading: false,
+      currentPage: 1,
+      pagesize: 10
     };
   },
   components: {
@@ -65,42 +78,50 @@ export default {
   },
   methods: {
     handleCommand({ type, row }) {
-      let userId='a001'
-      this.$router.push({
-        path: '/availability/availabilitydetile',
-        query: {
-            id: userId
+      if (type === "edite") {
+        this.$router.push({
+          path: "/availability/availabilitydetile",
+          query: {
+            id: row.house_id
           }
-      })
-      // this.$router.push({path: `/availability/availabilitydetile/${userId}`})
-      console.log(type, row);
+        });
+      } else {
+        deleteHouse({ house_id: row.house_id }).then(item => {
+          this.$message({
+            message: "提交成功！",
+            type: "success"
+          });
+          this.getHouseMessage();
+        });
+      }
     },
     getHouseMessage() {
+      this.loading = true;
       getHouseList().then(result => {
-        // hose_id: "h001"
-        // house_name: "李家沟"
-        // house_area: "20"
-        // house_price: "200"
-        // house_image: null
-        // house_status: "f"
-        // house_servers: "f001f002f003"
-        // house_descrip: "不得了啊"
-        // house_rentTime: "2019-02-03"
-        // house_rentDay: "2019-02-20"
-        // house_type: "一套三"
-        // let data = result.data.map(item => {
-        //   return {
-        //     house_rentTime: item.house_rentTime,
-        //     house_name: item.house_name,
-        //     house_id: item.house_id,
-        //     house_status: item.house_status,
-        //     house_type: item.house_type,
-        //     house_area: item.house_area,
-        //     house_price: item.house_price
-        //   };
-        // });
-        this.tableData=result.data
+        this.tableData = result.data;
+        console.log(this.tableData);
+
+        let id = result.data
+          .map(item => {
+            return parseInt(item.house_id.match(/\d+/g));
+          })
+          .sort((a, b) => b - a);
+        this.creatId = id[0] + 1;
+        this.loading = false;
       });
+    },
+    addHouse() {
+      this.creatId =
+        this.creatId > 9 ? "h0" + this.creatId : "h00" + this.creatId;
+      this.$router.push({
+        path: "/availability/availabilitydetile",
+        query: {
+          id: this.creatId
+        }
+      });
+    },
+    handleCurrentChange(val) {
+      this.currentPage = val;
     }
     // toggleSelection(rows) {
     //   if (rows) {

@@ -56,3 +56,11 @@ export function setUpdateHouse(data){
     data
   })
 }
+
+export function deleteHouse(data){
+  return request({
+    url: '/api/table/deleteHouse',
+    method: 'post',
+    data
+  })
+}
