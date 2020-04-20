@@ -18,6 +18,10 @@
               <el-tab-pane label="Account" name="account">
                 <account :user="user" />
               </el-tab-pane>
+              <el-tab-pane label="Tocking" name="tocking">
+                
+                <socket-tacking />
+              </el-tab-pane>
             </el-tabs>
           </el-card>
         </el-col>
@@ -32,10 +36,11 @@ import UserCard from "./components/UserCard";
 import Activity from "./components/Activity";
 import Timeline from "./components/Timeline";
 import Account from "./components/Account";
+import SocketTacking from "./components/SocketTacking";
 
 export default {
   name: "Customer-host",
-  components: { UserCard, Activity, Timeline, Account },
+  components: { UserCard, Activity, Timeline, Account,SocketTacking },
   data() {
     return {
       user: {},
