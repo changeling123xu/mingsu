@@ -95,8 +95,6 @@ export default {
   },
   methods: {
     sendMessage() {
-      console.log(123);
-      
       this.$socket.emit("newMessage",{
         id: this.user.userId,
         message: this.message
@@ -107,16 +105,6 @@ export default {
         type: this.user.type,
         message: this.message
       });
-      // var ws = new WebSocket("ws://localhost:8089/");
-      // ws.onopen = function() {
-      //   // console.log(JSON.stringify(this.value));
-
-      //   ws.send('123');
-      // };
-      // ws.onmessage = function(event) {
-      //   var data = JSON.parse(event.data);
-      //   console.log(data.da, data.name);
-      // };
     }
   }
 };
@@ -127,11 +115,6 @@ export default {
   position: relative;
   .chatlist {
     height: 60vh;
-    // position: absolute;
-    // top: 60px;
-    // bottom: 48px;
-    // left: 0px;
-    // right: 0px;
     
     padding: 10px;
     ul{
