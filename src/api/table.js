@@ -52,11 +52,18 @@ export function deleteRenter(params) {
 
 export function getHouseList(params) {
   return request({
-    url: '/api/table/getHouse',
+    url: '/api/table/getHouses',
     method: 'get',
     params
   });
 }
+// export function getHouseList(params) {
+//   return request({
+//     url: '/api/table/getHouse',
+//     method: 'get',
+//     params
+//   });
+// }/api/table/deleteHouseImage
 
 export function getHouseAllServer(params) {
   return request({
@@ -77,6 +84,14 @@ export function setUpdateHouse(data) {
 export function deleteHouse(data) {
   return request({
     url: '/api/table/deleteHouse',
+    method: 'post',
+    data
+  });
+}
+
+export function deleteHouseImage(data) {
+  return request({
+    url: '/api/table/deleteHouseImage',
     method: 'post',
     data
   });

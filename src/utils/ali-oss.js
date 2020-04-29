@@ -1,5 +1,5 @@
 // 引入ali-oss
-let OSS = require('ali-oss')
+const OSS = require('ali-oss');
 
 /**
  *  [accessKeyId] {String}：通过阿里云控制台创建的AccessKey。
@@ -10,13 +10,13 @@ let OSS = require('ali-oss')
 AccessKey ID LTAI4FhZ86nJ3jtALTg9XVto
 AccessKeySecret BRa6xAvG4waFK0XpacAzMjdoK64qRf
  */
-let client = new OSS({
+const client = new OSS({
   region: 'oss-cn-chengdu',
   // 云账号AccessKey有所有API访问权限，建议遵循阿里云安全最佳实践，部署在服务端使用RAM子账号或STS，部署在客户端使用STS。
   accessKeyId: 'LTAI4FhZ86nJ3jtALTg9XVto',
   accessKeySecret: 'BRa6xAvG4waFK0XpacAzMjdoK64qRf',
   bucket: 'xusu'
-})
+});
 
 /**
  *  上传文件，大小不能超过5GB
@@ -25,16 +25,15 @@ let client = new OSS({
  *
  * @retruns Promise
  */
-export const put = async (ObjName, fileUrl) => {
+export const put = async(ObjName, fileUrl) => {
   try {
-    let result = await client.put(`mingsu/${ObjName}`, fileUrl)
+    const result = await client.put(`mingsu/${ObjName}`, fileUrl);
     // AAA为文件夹， ObjName为文件名字,可以只写名字，就直接储存在 bucket 的根路径
-    console.log(result)
-    return result
+    return result;
   } catch (e) {
-    console.log(e)
+    console.log(e);
   }
-}
+};
 
 // export const delet = async (ObjName, fileUrl) => {
 //   try {
@@ -49,7 +48,7 @@ export const put = async (ObjName, fileUrl) => {
 
 export const getFileNameUUID = () => {
   function rx() {
-    return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1)
+    return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
   }
-  return `${+new Date()}_${rx()}${rx()}`
-}
+  return `${+new Date()}_${rx()}${rx()}`;
+};

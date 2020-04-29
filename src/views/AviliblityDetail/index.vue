@@ -7,8 +7,14 @@
           <el-input v-model="houseMessage.house_name" />
         </el-col>
       </el-form-item>
-      <el-form-item label="户型">
-        <el-select v-model="houseMessage.house_type" placeholder="请输入户型">
+      <el-form-item label="特色标签">
+        <el-select
+          v-model="houseMessage.house_Tag"
+          multiple
+          collapse-tags
+          style="margin-left: 20px;"
+          placeholder="请选择"
+        >
           <el-option
             v-for="item in houseType"
             :key="item.value"
@@ -17,7 +23,37 @@
           ></el-option>
         </el-select>
       </el-form-item>
-
+      <el-form-item label="房屋评分">
+        <div class="container-rate">
+          <el-rate v-model="houseMessage.score" show-text></el-rate>
+        </div>
+      </el-form-item>
+      <el-form-item label="户型">
+        <el-select v-model="houseOther.house_type" style="margin-left: 20px;" placeholder="请选择">
+          <el-option
+            v-for="item in houseTypeTag"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          ></el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="特色标签">
+        <el-select
+          v-model="houseMessage.introduce"
+          multiple
+          collapse-tags
+          style="margin-left: 20px;"
+          placeholder="请选择"
+        >
+          <el-option
+            v-for="item in houseMessage.introduce"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          ></el-option>
+        </el-select>
+      </el-form-item>
       <el-form-item label="租赁日期">
         <el-col :span="5">
           <el-date-picker
@@ -41,21 +77,21 @@
           />
         </el-col>
       </el-form-item>
-      <el-form-item label="面积">
+      <!-- <el-form-item label="面积">
         <el-input-number v-model="houseMessage.house_area" :step="2"></el-input-number>
-      </el-form-item>
+      </el-form-item>-->
       <el-form-item label="租金">
         <el-input-number v-model="houseMessage.house_price" :step="2"></el-input-number>
       </el-form-item>
       <el-form-item label="提供的服务">
         <el-transfer
-          v-model="houseMessage.house_servers"
+          v-model="houseOther.house_servers"
           :data="houseServer"
           :titles="['所有服务', '可提供的服务']"
         ></el-transfer>
       </el-form-item>
       <el-form-item label="房源描述">
-        <el-input v-model="houseMessage.house_descrip" type="textarea" />
+        <el-input v-model="houseOther.house_descrip" type="textarea" />
       </el-form-item>
       <el-form-item label="房源图片">
         <upload
@@ -63,6 +99,7 @@
           :listType="'picture-card'"
           :urlList="houseMessage.house_image"
           @on-success="onSuccess"
+          @on-remove="onRemove"
         ></upload>
       </el-form-item>
       <el-form-item>
@@ -74,7 +111,7 @@
 </template>
 
 <script>
-import { getHouseAllServer, getHouseList, setUpdateHouse } from "@/api/table";
+import { getHouseAllServer, getHouseList, setUpdateHouse ,deleteHouseImage} from "@/api/table";
 import Upload from "@/components/Upload";
 export default {
   name: "AviliblityDetail",
@@ -85,11 +122,16 @@ export default {
       loading: false,
       // url: "http://xusu.oss-cn-chengdu.aliyuncs.com/",
       houseMessage: {
+        id: null,
         house_id: "",
         house_name: "",
+        introduce:[],
         house_area: "",
+        scroe: null,
         house_price: "",
-        house_image: [],
+        house_image: []
+      },
+      houseOther: {
         house_status: "",
         house_servers: [],
         house_descrip: "",
@@ -98,6 +140,24 @@ export default {
         house_type: ""
       },
       houseType: [
+        {
+          label: "优选",
+          value: "优选"
+        },
+        {
+          label: "自营",
+          value: "自营"
+        },
+        {
+          label: "品牌民宿",
+          value: "品牌民宿"
+        },
+        {
+          label: "新房",
+          value: "新房"
+        }
+      ],
+      houseTypeTag: [
         {
           label: "一居",
           value: "一居"
@@ -111,11 +171,11 @@ export default {
           value: "三居"
         },
         {
-          label: "四居+",
-          value: "四居+"
+          label: "四局",
+          value: "四局"
         }
       ],
-      house_image: ""
+      house_image: []
     };
   },
   mounted() {
@@ -124,6 +184,7 @@ export default {
   methods: {
     getHouseServer() {
       let userId = this.$route.query.id;
+      this.houseMessage.house_id=userId
       getHouseAllServer().then(item => {
         this.houseServer = item.data.map(item1 => {
           return {
@@ -132,33 +193,53 @@ export default {
           };
         });
       });
-      getHouseList({ house_id: userId }).then(item => {
-        console.log(item.data);
+      getHouseList({ house_id: userId }).then(({ data }) => {
+        if (data.houseData.length > 0) {
+          let houseData = data.houseData.map(item => {
+            let titleTag =
+              item && item.titleTagList ? item.titleTagList.split(",") : [];
+            console.log(item);
 
-        if (item.data.length > 0) {
-          this.houseMessage = item.data[0];
-          this.houseMessage.house_image = item.data[0].house_image
-            ? item.data[0].house_image.split(",")
-            : [];
-          this.houseMessage.house_servers = item.data[0].house_servers.split(
-            ","
-          );
-        } else {
-          this.houseMessage.house_id = this.$route.query.id;
+            let image = item.houseUrl.map(item => {
+              let url= "http://xusu.oss-cn-chengdu.aliyuncs.com/mingsu/shoutRent/" + item.houser_image + ".jpg";
+              return {url:url,id:item.id}
+            });
+            return {
+              id: item.id,
+              house_id: item.houseId,
+              house_name: item.title,
+              introduce:item.introduce.split('·'),
+              house_Tag: titleTag,
+              score: item.score - 0,
+              house_price: item.price,
+              house_image: image
+            };
+          });
+          this.houseMessage = houseData[0];
         }
+        if (data.houseOther.length > 0) {
+          let item = data.houseOther[0];
+          this.houseOther = item;
+        }
+        console.log(this.houseOther);
       });
     },
     onSubmit() {
-      // console.log(this.$route.query.id);
+      let sendData = {
+        houseMessage: this.houseMessage,
+        houseOther: this.houseOther,
+        houseImage:this.house_image
+      };
       this.loading = true;
-      if (this.houseMessage.house_image.length == 0 || this.house_image.length == 0) {
-        this.houseMessage.house_image += this.house_image;
-      } else {
-        this.houseMessage.house_image += "," + this.house_image;
-      }
-      console.log(this.houseMessage);
-      debugger
-      setUpdateHouse(this.houseData).then(data => {
+      // if (
+      //   this.houseMessage.house_image.length == 0 ||
+      //   this.house_image.length == 0
+      // ) {
+      //   this.houseMessage.house_image += this.house_image;
+      // } else {
+      //   this.houseMessage.house_image += "," + this.house_image;
+      // }
+      setUpdateHouse(sendData).then(data => {
         this.loading = false;
       });
       this.$router.push("/availability/availability");
@@ -177,12 +258,17 @@ export default {
       this.$router.push("/availability/availability");
     },
     onSuccess(data) {
-      this.house_image = data.toString();
+      this.house_image = data;
+    },
+    onRemove(data){
+      let config={id:data.id}
+      deleteHouseImage(config)
+      
     }
   },
   computed: {
     houseData() {
-      let data = this.houseMessage;
+      let data = this.houseOther;
       data.house_servers = data.house_servers.toString();
       data.house_image = data.house_image.toString();
       return data;
@@ -210,13 +296,18 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .line {
   text-align: center;
 }
 .minsu-back {
   margin-top: 10px;
   margin-bottom: 25px;
+}
+.app-container {
+  .container-rate {
+    margin-top: 10px;
+  }
 }
 </style>
 

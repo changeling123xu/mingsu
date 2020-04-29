@@ -1,5 +1,3 @@
-
-
 <template>
   <div class="availability" v-loading="loading">
     <page-title title="房源信息表">
@@ -9,21 +7,19 @@
       </el-button>
     </page-title>
     <el-card shadow="hover">
-      <el-table
-        ref="multipleTable"
-        :data="tableData.slice((currentPage-1)*pagesize,currentPage*pagesize)"
-        tooltip-effect="dark"
-        style="width: 100%"
-      >
+      <el-table ref="multipleTable" :data="tableData" tooltip-effect="dark" style="width: 100%">
         <!-- @selection-change="handleSelectionChange" -->
         <el-table-column type="selection" width="55"></el-table-column>
         <el-table-column prop="house_id" label="ID" show-overflow-tooltip></el-table-column>
 
-        <el-table-column prop="house_name" label="小区名称" show-overflow-tooltip></el-table-column>
-        <el-table-column prop="introduce" label="租住类型" show-overflow-tooltip></el-table-column>
-        <el-table-column prop="titleTagList" label="标签" show-overflow-tooltip></el-table-column>
-        <el-table-column prop="house_score" label="评分" show-overflow-tooltip></el-table-column>
-        <el-table-column prop="house_price" label="价格" show-overflow-tooltip width="100"></el-table-column>
+        <el-table-column prop="house_name" label="小区名称" width="120"></el-table-column>
+        <el-table-column prop="house_status" label="状态" show-overflow-tooltip></el-table-column>
+        <el-table-column prop="house_type" label="户型" show-overflow-tooltip></el-table-column>
+        <el-table-column prop="house_area" label="面积" show-overflow-tooltip></el-table-column>
+        <el-table-column prop="house_price" label="价格" show-overflow-tooltip></el-table-column>
+        <el-table-column label="日期" width="120">
+          <template slot-scope="scope">{{ scope.row.house_rentTime }}</template>
+        </el-table-column>
         <el-table-column align="center" label="操作">
           <template slot-scope="scope">
             <el-dropdown trigger="click" @command="handleCommand">
@@ -51,7 +47,7 @@
       <el-pagination
         background
         layout="prev, pager, next"
-        :page-size="pagesize"
+        :page-size="10"
         :total="tableData.length"
         @current-change="handleCurrentChange"
         :current-page.sync="currentPage"
@@ -62,13 +58,12 @@
 <script>
 import PageTitle from "@/components/PageTitle";
 import { getHouseList, deleteHouse } from "@/api/table";
-import { getFileNameUUID } from "@/utils/ali-oss";
 import { Loading } from "element-ui";
 export default {
   data() {
     return {
       tableData: [],
-      // multipleSelection: [],
+      multipleSelection: [],
       creatId: "",
       loading: false,
       currentPage: 1,
@@ -103,55 +98,31 @@ export default {
     getHouseMessage() {
       this.loading = true;
       getHouseList().then(result => {
-        // this.tableData = result.data;
-        this.loading = false;
-        this.houseDataDetail(result.data);
-        // cityId: "45"
-        // houseId: "h0000"
-        // houseUrl: "ia_10000"
-        // id: 1
-        // introduce: "整租·1室1卫1床·可住2人·30天起租"
-        // introduce1: "实拍·5.0分 “超赞”"
-        // introduce2: "锦江区"
-        // price: "200"
-        // score: "5.0"
-        // title: "6000/月租【沐舍】精装轻奢LOFT"
-        // titleTagList: "优选,自营,品牌民宿"
+        this.tableData = result.data;
+        console.log(this.tableData);
+
         let id = result.data
           .map(item => {
             return parseInt(item.house_id.match(/\d+/g));
           })
           .sort((a, b) => b - a);
         this.creatId = id[0] + 1;
+        this.loading = false;
       });
-    },
-    houseDataDetail(house) {
-      let titleTagList = house.map(item => {
-        return {
-          titleTagList: item.titleTagList,
-          introduce: item.introduce,
-          house_id: item.houseId,
-          house_price: item.price,
-          house_score: item.score,
-          area: item.introduce2,
-          house_name: item.title
-        };
-      });
-      this.tableData = titleTagList;
     },
     addHouse() {
-      //   this.creatId =
-      //     this.creatId > 9 ? "h0" + this.creatId : "h00" + this.creatId;
+      this.creatId =
+        this.creatId > 9 ? "h0" + this.creatId : "h00" + this.creatId;
       this.$router.push({
         path: "/availability/availabilitydetile",
         query: {
-          id: getFileNameUUID()
+          id: this.creatId
         }
       });
     },
     handleCurrentChange(val) {
       this.currentPage = val;
-    },
+    }
   }
 };
 </script>

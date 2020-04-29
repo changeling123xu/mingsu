@@ -1,13 +1,18 @@
 <template>
   <div class="hello">
     <div class="block" v-if="urlList.length>0">
-      <div v-for="(item,index) of addLink" :key="index" >
-        <el-image :src="item" style="width:150px; height:150px" >
-          <div slot="placeholder" class="image-slot">
-            加载中
-            <span class="dot">...</span>
+      <div v-for="(item,index) of urlList" :key="index">
+        <div class="blockIcon">
+          <div class="blockIconimage" @click="deleteImgae(item)">
+            <i class="el-icon-circle-close"></i>
           </div>
-        </el-image>
+          <el-image :src="item.url" style="width:150px; height:150px">
+            <div slot="placeholder" class="image-slot">
+              加载中
+              <span class="dot">...</span>
+            </div>
+          </el-image>
+        </div>
       </div>
     </div>
     <el-upload
@@ -66,7 +71,7 @@ export default {
       default: "text"
     },
     urlList: {
-      type: [Array,String],
+      type: [Array, String],
       default: () => []
     }
   },
@@ -75,25 +80,55 @@ export default {
     return {
       dialogVisible: false,
       fileList: [],
-      dialogImageUrl: [],
+      dialogImageUrl: []
     };
   },
-  computed:{
-    addLink(){
-      let urlArrary=[]
-      let hanveurl=this.urlList.length>0?1:0
-      if(hanveurl){
-        urlArrary=this.urlList.map(item=>{
-          return 'http://xusu.oss-cn-chengdu.aliyuncs.com/'+item
-        })
-      }
-      if(this.urlList.constructor === String){
-        this.urlList=this.urlList.split(',')
-      }
-      return urlArrary
-    }
+  computed: {
+    // addLink() {
+    //   let urlArrary = [];
+    //   let hanveurl = this.urlList.length > 0 ? 1 : 0;
+    //   if (hanveurl) {
+    //     urlArrary = this.urlList.map(item => {
+    //       return "http://xusu.oss-cn-chengdu.aliyuncs.com/" + item;
+    //     });
+    //   }
+    //   if (this.urlList.constructor === String) {
+    //     this.urlList = this.urlList.split(",");
+    //   }
+    //   // this.fileList=urlArrary
+    //   return urlArrary;
+    // }
   },
   methods: {
+    deleteImgae(data) {
+      this.$confirm("此操作将永久删除该文件, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      })
+        .then(() => {
+          this.$emit("on-remove", data);
+          let list=this.urlList.filter(item=>{
+           let flag= item.id!=data.id
+            if(flag){
+              return item
+            }
+          })
+          debugger
+
+          this.urlList=list
+          this.$message({
+            type: "success",
+            message: "删除成功!"
+          });
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "已取消删除"
+          });
+        });
+    },
     handleRemove(file, fileList) {
       console.log(file, fileList);
 
@@ -124,12 +159,12 @@ export default {
       let objName = getFileNameUUID();
 
       // 调用 ali-oss 中的方法
-      put(`${objName}`, option.file).then(res => {
+      put(`shoutRent/${objName}`, option.file).then(res => {
         let isImage = this.dialogImageUrl.find(item => {
           item == res.name;
         });
         if (!isImage) {
-          this.dialogImageUrl.push(res.name);
+          this.dialogImageUrl.push(objName);
           this.$emit("on-success", this.dialogImageUrl);
         }
       });
@@ -139,12 +174,24 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
+<style lang="scss" scoped>
 .block {
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
+
+  .blockIcon {
+    position: relative;
+    .blockIconimage {
+      height: 20px;
+      width: 20px;
+      position: absolute;
+      right: 0;
+      z-index: 10;
+    }
+  }
 }
-.block>div{
+.block > div {
   margin: 5px;
 }
 </style>
